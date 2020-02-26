@@ -4,6 +4,7 @@ using Motorola.Snapi.Constants.Enums;
 using Motorola.Snapi.EventArguments;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,13 +26,15 @@ namespace BarcodeScanner
 
             List<IMotorolaBarcodeScanner> _scanners = BarcodeScannerManager.Instance.GetDevices();
 
-            Console.WriteLine(String.Format("Found {0} Devices.", _scanners.Count));
             if (_scanners.Count == 0)
             {
+                Console.WriteLine("No devices detected.");
                 Console.WriteLine("Press any key to exit the application...");
                 Console.ReadKey();
                 return;
             }
+
+            Console.WriteLine(String.Format("Found {0} Devices.", _scanners.Count));
 
             foreach (var scanner in _scanners)
             {
@@ -48,8 +51,12 @@ namespace BarcodeScanner
 
         private static void OnDataReceived(object sender, BarcodeScanEventArgs e)
         {
-            Console.WriteLine("Scan Successful");
-            Console.WriteLine("Data: " + e.Data);
+            Console.WriteLine("Scan Successful - Data: " + e.Data);
+            using (TextWriter textWriter = File.CreateText(e.Data.Replace(" ","_")))
+            {
+                textWriter.WriteLine(e.Data);
+            }
+
         }
     }
 }
